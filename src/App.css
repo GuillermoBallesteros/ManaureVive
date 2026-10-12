@@ -90,7 +90,7 @@ button, select, input { font-family: inherit; }
   background-position: center center;
   background-repeat: no-repeat;
   background-size: min(58vw, 820px) auto;
-  opacity: 1;
+  opacity: 0.4;
   filter: saturate(0.65) contrast(0.88);
 }
 
