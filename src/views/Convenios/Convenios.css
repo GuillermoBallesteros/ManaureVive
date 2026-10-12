@@ -1,0 +1,108 @@
+.convenios-grid {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(380px, auto);
+}
+
+@media (max-width: 900px) {
+  .convenios-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+    FILTER BAR
+========================= */
+
+.convenios-filters {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.convenios-field {
+  display: block;
+  min-width: 220px;
+}
+
+.convenios-field > span {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.convenios-field select {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #DCE5E0;
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .convenios-filters {
+    flex-direction: column;
+  }
+
+  .convenios-field {
+    min-width: 0;
+  }
+}
+
+
+/* =========================
+    FONDO DEL CONVENIO
+========================= */
+
+.convenios-view {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+}
+
+/*
+ * El logo del socio seleccionado funciona como marca de agua
+ * de toda la sección de Convenios. Queda dentro del área de
+ * contenido y nunca invade la barra lateral de navegación.
+ */
+.convenios-view::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 70px 2% 30px;
+  background-image: var(--partner-logo);
+  background-position: center 42%;
+  background-repeat: no-repeat;
+  background-size: min(72vw, 900px) auto;
+  opacity: 0.065;
+  filter: saturate(0.65) contrast(0.9);
+}
+
+/* El selector muestra únicamente el nombre del convenio. */
+.convenios-field:first-child {
+  min-width: 280px;
+}
+
+.convenios-field select {
+  appearance: auto;
+}
+
+@media (max-width: 900px) {
+  .convenios-view::before {
+    inset: 120px 0 25px;
+    background-size: min(92vw, 680px) auto;
+    opacity: 0.05;
+  }
+}
+
+@media (max-width: 600px) {
+  .convenios-view::before {
+    background-size: 95vw auto;
+    opacity: 0.045;
+  }
+}

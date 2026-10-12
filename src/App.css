@@ -1,18 +1,120 @@
-* { box-sizing: border-box; }
+/* ============================================================
+   MANAURE VIVE — DESIGN SYSTEM
+   Identidad visual: verde bosque + dorado + agua, sobre neutros.
+   ============================================================ */
 
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  background: #faf7f0;
-  color: #1c1c1c;
+:root {
+  --sidebar-width: 240px;
+
+  --bg: #F5F7F5;
+  --white: #FFFFFF;
+  --surface-gradient: linear-gradient(135deg, #FFFFFF 0%, #F8FAF8 58%, #EEF5F0 100%);
+  --green-gradient: linear-gradient(135deg, #063B25 0%, #0B5D3B 58%, #218C5A 100%);
+  --green-soft-gradient: linear-gradient(135deg, #EAF4EE 0%, #F8FBF9 100%);
+  --gold-gradient: linear-gradient(135deg, #D9A441 0%, #F2C66D 100%);
+  --water-gradient: linear-gradient(135deg, #286477 0%, #3E9CB5 100%);
+  --food-gradient: linear-gradient(135deg, #D9771C 0%, #F2B35B 100%);
+  --border: rgba(6, 59, 37, 0.09);
+
+  --green-dark: #063B25;
+  --green: #0B5D3B;
+  --green-mid: #218C5A;
+  --green-light: #6FAF8F;
+  --green-pale: #A8CDB8;
+  --gold: #D9A441;
+  --gold-light: #F2C66D;
+  --water: #3E9CB5;
+  --water-dark: #286477;
+  --orange: #E88924;
+
+  --text: #183027;
+  --text-muted: #64756D;
+  --text-soft: #97A59E;
+
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+
+  --shadow-card: 0 10px 28px rgba(6, 59, 37, 0.06);
+  --shadow-soft: 0 8px 22px rgba(6, 59, 37, 0.055);
+  --shadow-gradient: 0 14px 32px rgba(6, 59, 37, 0.08);
+
+  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, select, input { font-family: inherit; }
+
 .app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
 .app-main {
-  flex: 1;
+  position: relative;
+  isolation: isolate;
+  height: 100vh;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #F7F9F7 0%, #F1F5F2 50%, #F8F7F3 100%);
+  scrollbar-gutter: stable;
 }
+
+/* Marca de agua global: solo vive dentro del área de contenido,
+   nunca detrás de la barra lateral de navegación. */
+.app-main::before {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: var(--sidebar-width);
+  background-image: var(--main-logo);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: min(58vw, 820px) auto;
+  opacity: 1;
+  filter: saturate(0.65) contrast(0.88);
+}
+
+.app-main-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+}
+
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: 100dvh; }
+  .app-main { height: auto; overflow-y: auto; }
+
+  .app-main::before {
+    left: 0;
+    top: 0;
+    background-size: min(82vw, 680px) auto;
+    opacity: 0.06;
+  }
+}
+
+
+/*
+la que viene ahora es mi cancion favorita de todas las canciones que yo pueda escuchar
+
+*/

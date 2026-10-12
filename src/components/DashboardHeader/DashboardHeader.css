@@ -90,11 +90,11 @@
 
   padding: 8px 13px;
 
-  border: 1px solid #ded6c5;
+  border: 1px solid #E5DDCC;
   border-radius: 5px;
 
   color: var(--green-dark);
-  background: #f7f4ec;
+  background: linear-gradient(135deg, #FBF8F0 0%, #F5F0E4 100%);
 
   font-size: 12px;
   font-weight: 700;

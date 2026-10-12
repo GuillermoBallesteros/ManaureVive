@@ -1,5 +1,5 @@
 import './DashboardHeader.css';
-import logo from './Logo.png';
+import { MAIN_LOGO } from '../../data/partnerLogos';
 
 function DashboardHeader() {
   return (
@@ -11,13 +11,13 @@ function DashboardHeader() {
 
           <div className="dashboard-logo">
             <img
-              src={logo}
-              alt="Villa Adelaida"
+              src={MAIN_LOGO}
+              alt="Manaure Vive"
             />
           </div>
 
           <div>
-            <strong>VILLA ADELAIDA</strong>
+            <strong>MANAURE VIVE</strong>
             <span>Inteligencia comercial</span>
           </div>
 
@@ -25,7 +25,7 @@ function DashboardHeader() {
 
         <div className="dashboard-period">
           <span>Periodo</span>
-          <strong>2026</strong>
+          <strong>2025</strong>
         </div>
 
       </div>

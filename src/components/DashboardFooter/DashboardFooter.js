@@ -7,12 +7,12 @@ function DashboardFooter() {
       <div className="dashboard-footer-inner">
 
         <div>
-          <strong>VILLA ADELAIDA</strong>
-          <span>Centro Turístico y Ecológico</span>
+          <strong>MANAURE VIVE</strong>
+          <span>Convenio de empresas turísticas</span>
         </div>
 
         <div>
-          Dashboard de inteligencia comercial · Demo
+          Dashboard de inteligencia comercial
         </div>
 
       </div>

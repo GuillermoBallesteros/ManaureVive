@@ -1,21 +1,20 @@
 import { useState } from 'react';
 import './App.css';
-import DashboardHeader from './components/DashboardHeader/DashboardHeader';
-import DashboardNav from './components/DashboardNav/DashboardNav';
-import DashboardFooter from './components/DashboardFooter/DashboardFooter';
+import { MAIN_LOGO } from './data/partnerLogos';
+
+import DashboardSidebar from './components/DashboardSidebar/DashboardSidebar';
+
 import Overview from './views/Overview/Overview';
-import Behavior from './views/Behavior/Behavior';
+import Convenios from './views/Convenios/Convenios';
 import Experiences from './views/Experiences/Experiences';
-import Gastronomy from './views/Gastronomy/Gastronomy';
-import Opportunities from './views/Opportunities/Opportunities';
+import Behavior from './views/Behavior/Behavior';
 import Simulator from './views/Simulator/Simulator';
 
 const VIEWS = {
   overview: Overview,
-  behavior: Behavior,
+  convenios: Convenios,
   experiences: Experiences,
-  gastronomy: Gastronomy,
-  opportunities: Opportunities,
+  behavior: Behavior,
   simulator: Simulator
 };
 
@@ -25,12 +24,12 @@ function App() {
 
   return (
     <div className="app">
-      <DashboardHeader />
-      <DashboardNav activeView={activeView} onNavigate={setActiveView} />
-      <main className="app-main">
-        <ActiveComponent />
+      <DashboardSidebar activeView={activeView} onNavigate={setActiveView} />
+      <main className="app-main" style={{ '--main-logo': `url("${MAIN_LOGO}")` }}>
+        <div className="app-main-content">
+          <ActiveComponent />
+        </div>
       </main>
-      <DashboardFooter />
     </div>
   );
 }

@@ -1,161 +1,244 @@
 import { useMemo, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
+import '../../styles/view-shell.css';
 import './Simulator.css';
-import { PACKAGES, EXPERIENCES, CUSTOMER_TYPES, VISITS, simulatorInsights } from '../../data/dashboardData';
+import { EXPERIENCES, CUSTOMER_TYPES, RESERVATIONS, MONTHS, simulatorDefaults } from '../../data/dashboardData';
 
 const COP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(Math.round(n || 0));
 const compact = (n) => (n >= 1000000 ? `$${(n / 1000000).toFixed(1)} M` : `$${Math.round((n || 0) / 1000)} mil`);
-const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+const EXPERIENCE_LABELS = {
+  vivemanaure: 'Tour Manaure',
+  senderismo: 'Senderismo',
+  rio: 'Paseo al río',
+  gastronomica: 'Gastronomía',
+  aves: 'Vista aves'
+};
+const labelFor = (experience) => EXPERIENCE_LABELS[experience.id] || experience.name;
+
+const SEGMENT_COLORS = {
+  familia: { start: '#D9A441', end: '#F2C66D' },
+  parejas: { start: '#286477', end: '#3E9CB5' },
+  amigos: { start: '#0B5D3B', end: '#6FAF8F' },
+  otros: { start: '#507A73', end: '#A8CDB8' }
+};
+const getSegmentColor = (id) => SEGMENT_COLORS[id] || SEGMENT_COLORS.otros;
 
 function Simulator() {
-  const [experienceId, setExperienceId] = useState(EXPERIENCES[0]?.id || 'piscina');
-  const [packageId, setPackageId] = useState(PACKAGES[0]?.id || 'romantico');
-  const [price, setPrice] = useState(PACKAGES[0]?.defaultPrice || 250000);
-  const [conversion, setConversion] = useState(PACKAGES[0]?.defaultConversion || 12);
+  const defaultExperience = EXPERIENCES.find((e) => e.id === simulatorDefaults.experienceId) || EXPERIENCES[0];
+  const [experienceId, setExperienceId] = useState(defaultExperience.id);
+  const [segmentId, setSegmentId] = useState(simulatorDefaults.segmentId || CUSTOMER_TYPES[0]?.id);
+  const [price, setPrice] = useState(defaultExperience.price);
+  const [conversion, setConversion] = useState(simulatorDefaults.conversion || 15);
   const [affinityMetric, setAffinityMetric] = useState('rate');
 
   const selectedExperience = useMemo(() => EXPERIENCES.find((x) => x.id === experienceId) || EXPERIENCES[0], [experienceId]);
-  const selectedPackage = useMemo(() => PACKAGES.find((x) => x.id === packageId) || PACKAGES[0], [packageId]);
+  const selectedSegment = useMemo(() => CUSTOMER_TYPES.find((x) => x.id === segmentId) || CUSTOMER_TYPES[0], [segmentId]);
 
   const profileStats = useMemo(() => CUSTOMER_TYPES.map((type) => {
-    const segmentVisits = VISITS.filter((v) => v.customerType === type.id);
-    const experienceVisits = segmentVisits.filter((v) => v.experiences.includes(selectedExperience.id));
-    const clients = new Set(segmentVisits.map((v) => v.clientId)).size;
-    const experienceClients = new Set(experienceVisits.map((v) => v.clientId)).size;
+    const segmentReservations = RESERVATIONS.filter((v) => v.customerType === type.id);
+    const experienceReservations = segmentReservations.filter((v) => v.experiences.includes(selectedExperience.id));
+    const clients = new Set(segmentReservations.map((v) => v.clientId)).size;
+    const experienceClients = new Set(experienceReservations.map((v) => v.clientId)).size;
     const affinity = clients ? experienceClients / clients : 0;
     return { ...type, clients, experienceClients, affinity };
   }), [selectedExperience]);
 
-  const planProfile = profileStats.find((x) => x.id === selectedPackage.segment) || profileStats[0];
+  const targetProfile = profileStats.find((x) => x.id === selectedSegment.id) || profileStats[0];
   const bestExperienceProfile = [...profileStats].sort((a, b) => b.affinity - a.affinity)[0] || profileStats[0];
 
-  const potentialClients = Math.max(0, planProfile?.experienceClients || 0);
+  const potentialClients = Math.max(0, targetProfile?.experienceClients || 0);
   const estimatedReservations = Math.round((potentialClients * conversion) / 100);
   const scenarioRevenue = estimatedReservations * price;
-  const experiencePrice = selectedExperience?.price || 0;
 
-  const monthlyPlanRevenue = useMemo(() => PACKAGES.map((pkg) => {
+  const monthlySegmentRevenue = useMemo(() => CUSTOMER_TYPES.map((type) => {
     const values = MONTHS.map((_, index) => {
-      const monthVisits = VISITS.filter((v) => v.month === index + 1 && v.customerType === pkg.segment);
-      const monthClients = new Set(monthVisits.map((v) => v.clientId)).size;
-      const experienceClients = new Set(monthVisits.filter((v) => v.experiences.includes(selectedExperience.id)).map((v) => v.clientId)).size;
+      const monthReservations = RESERVATIONS.filter((v) => v.month === index + 1 && v.customerType === type.id);
+      const monthClients = new Set(monthReservations.map((v) => v.clientId)).size;
+      const experienceClients = new Set(monthReservations.filter((v) => v.experiences.includes(selectedExperience.id)).map((v) => v.clientId)).size;
       const affinity = monthClients ? experienceClients / monthClients : 0;
       return Math.round(monthClients * affinity * (conversion / 100) * price);
     });
-    return { ...pkg, values };
+    return { ...type, values };
   }), [selectedExperience, conversion, price]);
 
   const trendOption = useMemo(() => ({
-    grid: { left: 58, right: 25, top: 48, bottom: 35 },
-    legend: { top: 0, type: 'scroll', textStyle: { color: '#53635a', fontSize: 10 } },
+    grid: { left: 52, right: 15, top: 26, bottom: 22 },
+    legend: { top: 0, type: 'scroll', textStyle: { color: '#53635a', fontSize: 9 } },
     tooltip: { trigger: 'axis', valueFormatter: (v) => COP(v) },
-    xAxis: { type: 'category', data: MONTHS },
-    yAxis: { type: 'value', axisLabel: { formatter: (v) => compact(v) }, splitLine: { lineStyle: { color: '#e7eee9' } } },
-    series: monthlyPlanRevenue.map((pkg, index) => ({
-      name: pkg.name,
-      type: 'line', smooth: 0.25, symbol: 'circle', symbolSize: 5, data: pkg.values,
-      lineStyle: { width: pkg.id === selectedPackage.id ? 4 : 2, opacity: pkg.id === selectedPackage.id ? 1 : .5 },
-      itemStyle: { color: ['#286b45','#719b83','#173b29','#526158','#9ab9a8'][index % 5] },
+    xAxis: { type: 'category', data: MONTHS, axisLabel: { fontSize: 9.5 } },
+    yAxis: { type: 'value', axisLabel: { formatter: (v) => compact(v), fontSize: 9.5 }, splitLine: { lineStyle: { color: '#eef1ee' } } },
+    series: monthlySegmentRevenue.map((type) => ({
+      name: type.name, type: 'line', smooth: 0.25, symbol: 'circle', symbolSize: 4, data: type.values,
+      lineStyle: {
+        width: type.id === selectedSegment.id ? 3.5 : 1.5,
+        opacity: type.id === selectedSegment.id ? 1 : 0.58,
+        color: (() => {
+          const palette = getSegmentColor(type.id);
+          return {
+            type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+            colorStops: [{ offset: 0, color: palette.start }, { offset: 1, color: palette.end }]
+          };
+        })()
+      },
+      itemStyle: { color: (() => {
+        const palette = getSegmentColor(type.id);
+        return {
+          type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+          colorStops: [{ offset: 0, color: palette.start }, { offset: 1, color: palette.end }]
+        };
+      })() },
       emphasis: { focus: 'series' }
     }))
-  }), [monthlyPlanRevenue, selectedPackage.id]);
+  }), [monthlySegmentRevenue, selectedSegment.id]);
 
   const affinityValues = profileStats.slice().reverse();
   const affinityOption = useMemo(() => ({
-    grid: { left: 105, right: 55, top: 18, bottom: 35 },
+    grid: { left: 100, right: 45, top: 6, bottom: 20 },
     tooltip: {
       trigger: 'axis', axisPointer: { type: 'shadow' },
       formatter: (params) => {
         const p = params[0];
         const item = affinityValues.find((x) => x.name === p.name);
         if (!item) return '';
-        return `<strong>${item.name}</strong><br/>${selectedExperience.name}<br/><strong>${Math.round(item.affinity * 100)}%</strong> de sus clientes consumieron esta experiencia<br/>${item.experienceClients.toLocaleString('es-CO')} clientes`;
+        return `<strong>${item.name}</strong><br/>${labelFor(selectedExperience)}<br/><strong>${Math.round(item.affinity * 100)}%</strong> de sus clientes consumieron esta experiencia<br/>${item.experienceClients.toLocaleString('es-CO')} clientes`;
       }
     },
     xAxis: affinityMetric === 'rate'
-      ? { type: 'value', min: 0, max: 1, axisLabel: { formatter: (v) => `${Math.round(v * 100)}%` }, splitLine: { lineStyle: { color: '#e7eee9' } } }
-      : { type: 'value', min: 0, axisLabel: { formatter: (v) => v.toLocaleString('es-CO') }, splitLine: { lineStyle: { color: '#e7eee9' } } },
-    yAxis: { type: 'category', data: affinityValues.map((x) => x.name) },
+      ? { type: 'value', min: 0, max: 1, axisLabel: { formatter: (v) => `${Math.round(v * 100)}%`, fontSize: 9.5 }, splitLine: { lineStyle: { color: '#eef1ee' } } }
+      : { type: 'value', min: 0, axisLabel: { formatter: (v) => v.toLocaleString('es-CO'), fontSize: 9.5 }, splitLine: { lineStyle: { color: '#eef1ee' } } },
+    yAxis: { type: 'category', data: affinityValues.map((x) => x.name), axisLabel: { fontSize: 10 } },
     series: [{
       name: affinityMetric === 'rate' ? 'Afinidad' : 'Clientes con afinidad', type: 'bar',
-      data: affinityValues.map((x) => affinityMetric === 'rate' ? x.affinity : x.experienceClients), barMaxWidth: 24,
-      itemStyle: { color: '#286b45', borderRadius: [0, 7, 7, 0] },
-      label: { show: true, position: 'right', formatter: (p) => affinityMetric === 'rate' ? `${Math.round(p.value * 100)}%` : p.value.toLocaleString('es-CO'), color: '#31463a' }
+      data: affinityValues.map((x) => ({
+        value: affinityMetric === 'rate' ? x.affinity : x.experienceClients,
+        itemStyle: (() => {
+          const palette = getSegmentColor(x.id);
+          return {
+            color: {
+              type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+              colorStops: [{ offset: 0, color: palette.start }, { offset: 1, color: palette.end }]
+            },
+            borderRadius: [0, 6, 6, 0]
+          };
+        })()
+      })), barMaxWidth: 18,
+      label: { show: true, position: 'right', formatter: (p) => (affinityMetric === 'rate' ? `${Math.round(p.value * 100)}%` : p.value.toLocaleString('es-CO')), color: '#183027', fontSize: 9.5 }
     }]
   }), [affinityValues, affinityMetric, selectedExperience]);
 
-  const handlePackageChange = (id) => {
-    const pkg = PACKAGES.find((p) => p.id === id) || PACKAGES[0];
-    setPackageId(pkg.id); setPrice(pkg.defaultPrice); setConversion(pkg.defaultConversion);
+  const handleExperienceChange = (id) => {
+    const exp = EXPERIENCES.find((e) => e.id === id) || EXPERIENCES[0];
+    setExperienceId(exp.id);
+    setPrice(exp.price);
   };
 
   const reset = () => {
-    const pkg = PACKAGES[0];
-    setExperienceId(EXPERIENCES[0]?.id || 'piscina'); setPackageId(pkg.id); setPrice(pkg.defaultPrice); setConversion(pkg.defaultConversion); setAffinityMetric('rate');
+    setExperienceId(defaultExperience.id);
+    setSegmentId(simulatorDefaults.segmentId || CUSTOMER_TYPES[0]?.id);
+    setPrice(defaultExperience.price);
+    setConversion(simulatorDefaults.conversion || 15);
+    setAffinityMetric('rate');
   };
 
   return (
-    <section className="simulator-view">
-      <header className="simulator-header">
-        <span className="simulator-tag">06 · SIMULADOR</span>
-        <h1>Prueba qué combinación de experiencia y plan tiene mayor potencial.</h1>
-        <p>Selecciona una experiencia, un plan y una conversión. El simulador usa el comportamiento observado para estimar cuántas reservas y cuánto ingreso podría representar ese escenario.</p>
+    <main className="view">
+      <header className="view-header">
+        <div>
+          <span className="view-tag">Simulador</span>
+          <h1>Prueba la <em>combinación</em> con mayor potencial</h1>
+        </div>
       </header>
 
-      <div className="simulator-container">
-        <article className="simulator-config">
-          <div className="config-header"><h2>Construir escenario</h2><span>EXPERIENCIA + PLAN</span></div>
-          <label className="config-field"><span>Experiencia a impulsar</span>
-            <select value={experienceId} onChange={(e) => setExperienceId(e.target.value)}>{EXPERIENCES.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</select>
+      <div className="view-grid simulator-grid">
+        <article className="view-card simulator-config">
+          <div className="config-header"><h2 style={{ margin: 0, fontSize: 14, color: '#1f3d2e' }}>Construir escenario</h2><span>EXPERIENCIA + PÚBLICO</span></div>
+
+          <label className="config-field">
+            <span>Experiencia a impulsar</span>
+            <select value={experienceId} onChange={(e) => handleExperienceChange(e.target.value)}>
+              {EXPERIENCES.map((e) => <option key={e.id} value={e.id}>{labelFor(e)}</option>)}
+            </select>
           </label>
-          <label className="config-field"><span>Plan comercial</span>
-            <select value={packageId} onChange={(e) => handlePackageChange(e.target.value)}>{PACKAGES.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>
+
+          <label className="config-field">
+            <span>Público objetivo</span>
+            <select value={segmentId} onChange={(e) => setSegmentId(e.target.value)}>
+              {CUSTOMER_TYPES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
           </label>
-          <p className="package-description">{selectedPackage.description}</p>
-          <div className="scenario-rule"><strong>Cómo se calcula</strong><span>Clientes del público objetivo que ya consumieron la experiencia × conversión simulada × precio del plan.</span></div>
-          <label className="config-field"><span>Precio del plan: <strong>{COP(price)}</strong></span>
-            <input type="range" min={selectedPackage.minPrice} max={selectedPackage.maxPrice} step={5000} value={price} onChange={(e) => setPrice(Number(e.target.value))} />
+
+          <label className="config-field">
+            <span>Tarifa: <strong>{COP(price)}</strong></span>
+            <input
+              type="range"
+              min={Math.round(selectedExperience.price * 0.6)}
+              max={Math.round(selectedExperience.price * 1.6)}
+              step={5000}
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
+            />
           </label>
-          <label className="config-field"><span>Conversión estimada: <strong>{conversion}%</strong></span>
+
+          <label className="config-field">
+            <span>Conversión estimada: <strong>{conversion}%</strong></span>
             <input type="range" min={1} max={40} step={1} value={conversion} onChange={(e) => setConversion(Number(e.target.value))} />
           </label>
+
           <button type="button" className="reset-button" onClick={reset}>REINICIAR ESCENARIO</button>
         </article>
 
-        <article className="simulator-results">
-          <div className="result-card"><span>EXPERIENCIA</span><strong>{selectedExperience.name}</strong><small>Tarifa actual: {COP(experiencePrice)}</small></div>
-          <div className="result-card"><span>PÚBLICO OBJETIVO DEL PLAN</span><strong>{planProfile?.name || '—'}</strong><small>{Math.round((planProfile?.affinity || 0) * 100)}% de sus clientes consumieron esta experiencia</small></div>
-          <div className="result-card highlight"><span>INGRESO POTENCIAL</span><strong>{compact(scenarioRevenue)}</strong><small>{estimatedReservations.toLocaleString('es-CO')} reservas estimadas</small></div>
-        </article>
+        <div className="simulator-results">
+          <div className="result-card">
+            <span>Experiencia</span>
+            <strong>{labelFor(selectedExperience)}</strong>
+            <small>Tarifa actual: {COP(price)}</small>
+          </div>
+          <div className="result-card">
+            <span>Público objetivo</span>
+            <strong>{targetProfile?.name || '—'}</strong>
+            <small>{Math.round((targetProfile?.affinity || 0) * 100)}% consumió esta experiencia</small>
+          </div>
+          <div className="result-card highlight">
+            <span>Ingreso potencial</span>
+            <strong>{compact(scenarioRevenue)}</strong>
+            <small>{estimatedReservations.toLocaleString('es-CO')} reservas estimadas</small>
+          </div>
+        </div>
 
-        <article className="simulation-chart-card">
-          <div className="simulation-card-header"><div><h2>Cómo cambia el ingreso potencial según el plan</h2><span>Cada línea representa un plan para {selectedExperience.name}.</span></div></div>
-          <ReactECharts option={trendOption} style={{ height: 350 }} />
-        </article>
-
-        <article className="simulation-chart-card affinity-simulation-card">
+        <article className="simulation-chart-card trend">
           <div className="simulation-card-header">
-            <div><h2>¿Qué público tiene afinidad con {selectedExperience.name}?</h2><span>La relación siempre se lee respecto a la experiencia seleccionada.</span></div>
+            <div><h2>Ingreso potencial por público</h2></div>
+          </div>
+          <div className="view-chart"><ReactECharts option={trendOption} style={{ height: '100%', width: '100%' }} /></div>
+        </article>
+
+        <article className="simulation-chart-card affinity">
+          <div className="simulation-card-header">
+            <div><h2>Afinidad con {labelFor(selectedExperience)}</h2></div>
             <div className="affinity-options" role="group" aria-label="Forma de medir la afinidad">
-              <button type="button" className={affinityMetric === 'rate' ? 'active' : ''} onClick={() => setAffinityMetric('rate')}>% del público</button>
+              <button type="button" className={affinityMetric === 'rate' ? 'active' : ''} onClick={() => setAffinityMetric('rate')}>% público</button>
               <button type="button" className={affinityMetric === 'clients' ? 'active' : ''} onClick={() => setAffinityMetric('clients')}>Clientes</button>
             </div>
           </div>
-          <div className="affinity-definition">{affinityMetric === 'rate' ? 'Ejemplo: 35% significa que 35 de cada 100 clientes de ese público consumieron esta experiencia.' : 'Muestra cuántos clientes únicos de cada público ya consumieron esta experiencia.'}</div>
-          <ReactECharts option={affinityOption} style={{ height: 330 }} />
-          <div className="affinity-highlight"><strong>Mayor afinidad:</strong> {bestExperienceProfile?.name} · {Math.round((bestExperienceProfile?.affinity || 0) * 100)}% de sus clientes consumieron {selectedExperience.name}.</div>
-        </article>
-
-        <article className="simulation-conclusion">
-          <div><span>LECTURA DEL ESCENARIO</span>
-            <p>Estás simulando <strong>{selectedPackage.name}</strong> para <strong>{planProfile?.name}</strong>, aprovechando una experiencia con una afinidad observada del <strong>{Math.round((planProfile?.affinity || 0) * 100)}%</strong>. Sobre <strong>{potentialClients.toLocaleString('es-CO')} clientes</strong> de ese público que ya consumieron <strong>{selectedExperience.name}</strong>, una conversión del <strong>{conversion}%</strong> produciría aproximadamente <strong>{estimatedReservations.toLocaleString('es-CO')} reservas</strong>. A un precio de <strong>{COP(price)}</strong> por plan, el ingreso potencial sería de <strong>{compact(scenarioRevenue)}</strong>.</p>
+          <div className="view-chart"><ReactECharts option={affinityOption} style={{ height: '100%', width: '100%' }} /></div>
+          <div className="affinity-highlight">
+            <strong>Mayor afinidad:</strong> {bestExperienceProfile?.name} · {Math.round((bestExperienceProfile?.affinity || 0) * 100)}%
           </div>
-          <div className="conclusion-value"><span>MEJOR AFINIDAD DE LA EXPERIENCIA</span><strong>{bestExperienceProfile?.name}</strong><small>{Math.round((bestExperienceProfile?.affinity || 0) * 100)}% del público</small></div>
         </article>
-
-        <p className="simulator-disclaimer">{simulatorInsights.disclaimer} El ingreso mostrado es un escenario hipotético y no una venta garantizada.</p>
       </div>
-    </section>
+      <section className="insight-banner">
+        <div className="insight-content">
+          <span>Lectura del escenario</span>
+          <h2>{labelFor(selectedExperience)} para {targetProfile?.name || 'el público seleccionado'} proyecta {compact(scenarioRevenue)} con una conversión del {conversion}%.</h2>
+        </div>
+        <div className="insight-stats">
+          <div><small>Ingreso potencial</small><strong>{compact(scenarioRevenue)}</strong><span>{estimatedReservations.toLocaleString('es-CO')} reservas</span></div>
+          <div><small>Mayor afinidad</small><strong>{bestExperienceProfile?.name || '—'}</strong><span>{Math.round((bestExperienceProfile?.affinity || 0) * 100)}%</span></div>
+          <div><small>Tarifa simulada</small><strong>{COP(price)}</strong><span>Conversión {conversion}%</span></div>
+        </div>
+      </section>
+    </main>
   );
 }
 

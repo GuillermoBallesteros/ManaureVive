@@ -4,12 +4,12 @@ const NAV_ITEMS = [
   {
     id: 'overview',
     code: '01',
-    label: 'Resumen'
+    label: 'General'
   },
   {
-    id: 'behavior',
+    id: 'convenios',
     code: '02',
-    label: 'Comportamiento'
+    label: 'Convenios'
   },
   {
     id: 'experiences',
@@ -17,18 +17,13 @@ const NAV_ITEMS = [
     label: 'Experiencias'
   },
   {
-    id: 'gastronomy',
+    id: 'behavior',
     code: '04',
-    label: 'Gastronomía'
-  },
-  {
-    id: 'opportunities',
-    code: '05',
-    label: 'Oportunidades'
+    label: 'Comportamiento'
   },
   {
     id: 'simulator',
-    code: '06',
+    code: '05',
     label: 'Simulador'
   }
 ];

@@ -1,33 +1,127 @@
 import ReactECharts from 'echarts-for-react';
+import '../../styles/view-shell.css';
 import './Overview.css';
-import { MONTHS, overviewKPIs, monthlySales, salesBySource, overviewInsight, VISITS } from '../../data/dashboardData';
+import { MONTHS, generalKPIs, consortiumMonthlyRevenue, top5Partners } from '../../data/dashboardData';
 
-const COP = (n) => new Intl.NumberFormat('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 }).format(n);
+const COP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
+const compact = (n) => (n >= 1000000 ? `$${(n / 1000000).toFixed(1)} M` : `$${Math.round(n / 1000)} mil`);
 
-function Overview(){
-  const best = [...monthlySales].sort((a,b)=>b.sales-a.sales)[0];
-  const weakest = [...monthlySales].sort((a,b)=>a.sales-b.sales)[0];
-  const monthVisits = Object.fromEntries(MONTHS.map((m,i)=>[m,VISITS.filter(v=>v.month===i+1)]));
-  const bestReason = best.month === 'Sep' ? 'Amor y Amistad fortalece la presencia de parejas y eleva el consumo de experiencias y restaurante.' : 'La combinación de mayor tráfico y mayor consumo por visita explica su liderazgo.';
-  const weakReason = weakest.month === 'Feb' ? 'febrero no tiene un festivo relevante y concentra menos visitas de los segmentos de mayor gasto.' : 'presenta menos días de operación y menor intensidad de demanda.';
-  const trend = { grid:{left:55,right:25,top:28,bottom:35}, tooltip:{trigger:'axis',valueFormatter:v=>COP(v)}, xAxis:{type:'category',data:MONTHS}, yAxis:{type:'value',axisLabel:{formatter:v=>`${Math.round(v/1000000)} M`}}, series:[{type:'line',data:monthlySales.map(m=>m.sales),smooth:.28,symbol:'circle',symbolSize:7,lineStyle:{width:3},areaStyle:{opacity:.09}}] };
-  const source = { grid:{left:135,right:30,top:15,bottom:25}, tooltip:{trigger:'axis',valueFormatter:v=>COP(v)}, xAxis:{type:'value',axisLabel:{formatter:v=>`${Math.round(v/1000000)} M`}}, yAxis:{type:'category',data:salesBySource.slice(0,7).map(x=>x.name).reverse()}, series:[{type:'bar',data:salesBySource.slice(0,7).map(x=>x.value).reverse(),barMaxWidth:24,itemStyle:{borderRadius:[0,7,7,0]}}] };
-  return <main className="overview-view">
-    <header className="overview-header"><span className="overview-tag">01 · RESUMEN EJECUTIVO</span><h1>¿Cómo está funcionando<br/><em>Villa Adelaida?</em></h1><p>Una lectura ejecutiva de ventas, clientes, recurrencia y estacionalidad para entender qué está moviendo el negocio.</p></header>
-    <div className="overview-kpis">
-      <article className="overview-kpi featured"><span>VENTAS TOTALES</span><strong>{COP(overviewKPIs.sales)}</strong><small>Ingresos generados durante 2026</small></article>
-      <article className="overview-kpi"><span>CLIENTES</span><strong>{overviewKPIs.clients.toLocaleString('es-CO')}</strong><small>Clientes identificados</small></article>
-      <article className="overview-kpi"><span>RECURRENCIA</span><strong>{overviewKPIs.recurringRate}%</strong><small>Clientes que regresan</small></article>
-      <article className="overview-kpi"><span>TICKET PROMEDIO</span><strong>{COP(overviewKPIs.avgTicket)}</strong><small>Por visita</small></article>
-    </div>
-    <div className="overview-grid">
-      <article className="overview-card large"><div className="card-heading"><div><span>ESTACIONALIDAD</span><h2>¿Cuándo genera más el negocio?</h2></div><p>El comportamiento mensual permite identificar temporadas que merecen acciones comerciales distintas.</p></div><ReactECharts option={trend} style={{height:380}}/></article>
-      <article className="overview-card"><div className="card-heading"><div><span>ORIGEN DE LOS INGRESOS</span><h2>¿Qué está pagando el cliente?</h2></div></div><ReactECharts option={source} style={{height:380}}/></article>
-    </div>
-    <section className="overview-business-story">
-      <div className="story-main"><span>LECTURA DEL NEGOCIO</span><h2>Junio es el mes con mayor recurrencia; febrero es uno de los meses más débiles.</h2><p>{overviewInsight}</p></div>
-      <div className="story-columns"><div><strong>{best.month} · {COP(best.sales)}</strong><span>{bestReason}</span></div><div><strong>{weakest.month} · {COP(weakest.sales)}</strong><span>{weakReason}</span></div></div>
-    </section>
-  </main>
+function Overview() {
+  const { totalIncome, lastMonthIncome, lastMonthName, bestMonth, weakestMonth, topPartner } = generalKPIs;
+
+  const trend = {
+    grid: { left: 55, right: 20, top: 18, bottom: 28 },
+    tooltip: { trigger: 'axis', valueFormatter: (v) => COP(v) },
+    xAxis: { type: 'category', data: MONTHS, axisLabel: { fontSize: 10 } },
+    yAxis: { type: 'value', axisLabel: { formatter: (v) => `${Math.round(v / 1000000)} M`, fontSize: 10 }, splitLine: { lineStyle: { color: '#eef1ee' } } },
+    series: [{
+      type: 'line', data: consortiumMonthlyRevenue.map((m) => m.ingresos), smooth: 0.28,
+      symbol: 'circle', symbolSize: 6, lineStyle: { width: 3, color: '#0B5D3B' },
+      itemStyle: { color: '#218C5A' },
+      areaStyle: { color: {
+        type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [{ offset: 0, color: 'rgba(11,93,59,.22)' }, { offset: 1, color: 'rgba(11,93,59,.01)' }]
+      }}
+    }]
+  };
+
+  const partners = {
+    grid: { left: 125, right: 55, top: 6, bottom: 32 },
+    tooltip: { trigger: 'axis', valueFormatter: (v) => COP(v) },
+    xAxis: {
+      type: 'value',
+      min: 0,
+      max: 500000000,
+      interval: 200000000,
+      axisLabel: {
+        formatter: (v) => `${Math.round(v / 1000000)} M`,
+        fontSize: 9,
+        margin: 9,
+        hideOverlap: true
+      },
+      splitLine: { lineStyle: { color: '#eef1ee' } }
+    },
+    yAxis: { type: 'category', data: top5Partners.map((x) => x.name).reverse(), axisLabel: { fontSize: 11 }, axisLine: { show: false }, axisTick: { show: false } },
+    series: [{
+      type: 'bar', data: top5Partners.map((x) => x.annualRevenue).reverse(),
+      barMaxWidth: 22, itemStyle: { color: {
+        type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+        colorStops: [{ offset: 0, color: '#0B5D3B' }, { offset: 1, color: '#8ab49a' }]
+      }, borderRadius: [0, 6, 6, 0] },
+      label: { show: true, position: 'right', fontSize: 10, color: '#294235', formatter: (p) => `${Math.round(p.value / 1000000)} M` }
+    }]
+  };
+
+  return (
+    <main className="view">
+      <header className="view-header">
+        <div>
+          <span className="view-tag">General</span>
+          <h1>¿Cómo va el convenio <em>Manaure Vive?</em></h1>
+        </div>
+      </header>
+
+      <div className="view-kpis">
+        <article className="kpi featured">
+          <span>Ingreso total 2025</span>
+          <strong>{compact(totalIncome)}</strong>
+          <small>Suma de los 10 socios</small>
+        </article>
+        <article className="kpi">
+          <span>Ingreso {lastMonthName}</span>
+          <strong>{compact(lastMonthIncome)}</strong>
+          <small>Último mes registrado</small>
+        </article>
+        <article className="kpi">
+          <span>Mejor mes del año</span>
+          <strong>{bestMonth.month}</strong>
+          <small>{COP(bestMonth.ingresos)}</small>
+        </article>
+        <article className="kpi">
+          <span>Socio top del año</span>
+          <strong>{topPartner.name}</strong>
+          <small>{COP(topPartner.annualRevenue)}</small>
+        </article>
+      </div>
+
+      <div className="view-grid overview-grid">
+        <article className="view-card">
+          <div className="view-card-head">
+            <div>
+              <span>Ingreso mensual del convenio</span>
+              <h2>Evolución 2025</h2>
+            </div>
+          </div>
+          <div className="view-chart">
+            <ReactECharts option={trend} style={{ height: '100%', width: '100%' }} />
+          </div>
+        </article>
+
+        <article className="view-card">
+          <div className="view-card-head">
+            <div>
+              <span>Top 5 socios · ingreso anual</span>
+              <h2>¿Quién genera más ingresos?</h2>
+            </div>
+          </div>
+          <div className="view-chart">
+            <ReactECharts option={partners} style={{ height: '100%', width: '100%' }} />
+          </div>
+        </article>
+      </div>
+      <section className="insight-banner">
+        <div className="insight-content">
+          <span>Lectura general</span>
+          <h2>{bestMonth.month} concentra el mayor ingreso del convenio; {weakestMonth.month} marca el punto más bajo.</h2>
+        </div>
+        <div className="insight-stats">
+          <div><small>Mes más fuerte</small><strong>{bestMonth.month}</strong><span>{COP(bestMonth.ingresos)}</span></div>
+          <div><small>Mes más débil</small><strong>{weakestMonth.month}</strong><span>{COP(weakestMonth.ingresos)}</span></div>
+          <div><small>Socio principal</small><strong>{topPartner.name}</strong><span>{COP(topPartner.annualRevenue)}</span></div>
+        </div>
+      </section>
+    </main>
+  );
 }
+
 export default Overview;
