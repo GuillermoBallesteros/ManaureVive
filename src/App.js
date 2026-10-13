@@ -9,12 +9,16 @@ import Convenios from './views/Convenios/Convenios';
 import Experiences from './views/Experiences/Experiences';
 import Behavior from './views/Behavior/Behavior';
 import Simulator from './views/Simulator/Simulator';
+import ExperienceAnalysis from './views/ExperienceAnalysis';
+import Clients from './views/Clients';
 
 const VIEWS = {
   overview: Overview,
   convenios: Convenios,
   experiences: Experiences,
   behavior: Behavior,
+  experienceAnalysis: ExperienceAnalysis,
+  clients: Clients,
   simulator: Simulator
 };
 

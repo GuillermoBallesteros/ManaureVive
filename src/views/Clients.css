@@ -1,0 +1,9 @@
+
+.clients-grid { grid-template-columns: 1fr 1fr; grid-template-rows: minmax(320px, auto) auto; }
+.clients-grid .wide { grid-column: 1 / -1; }
+.client-insight-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 8px 0 14px; }
+.client-insight-grid > div { background: linear-gradient(135deg,#f8fbf9,#edf5ef); border: 1px solid #e2ebe4; border-radius: 10px; padding: 14px; min-width: 0; }
+.client-insight-grid span, .client-insight-grid small { display: block; color: #738178; font-size: 10px; line-height: 1.45; }
+.client-insight-grid strong { display: block; margin: 8px 0 5px; color: #183027; font-size: 16px; overflow-wrap: anywhere; }
+.clients-note { color: #78857d; font-size: 11px; line-height: 1.6; margin: 10px 0 0; }
+@media (max-width: 900px) { .clients-grid { grid-template-columns: 1fr; } .clients-grid .wide { grid-column: auto; } .client-insight-grid { grid-template-columns: 1fr; } }

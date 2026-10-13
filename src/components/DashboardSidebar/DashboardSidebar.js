@@ -48,6 +48,24 @@ const NAV_ITEMS = [
     )
   },
   {
+    id: 'experienceAnalysis',
+    label: 'Análisis de experiencias',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M4 19V5M4 19h16" /><path d="m7 15 4-5 3 2 5-7" />
+      </svg>
+    )
+  },
+  {
+    id: 'clients',
+    label: 'Clientes',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.4 2.5-5.6 6-5.6s6 2.2 6 5.6" /><path d="M16 5.5a3 3 0 0 1 0 5.8M17 14.5c2.4.5 4 2.4 4 5" />
+      </svg>
+    )
+  },
+  {
     id: 'simulator',
     label: 'Simulador',
     icon: (
@@ -100,6 +118,8 @@ function DashboardSidebar({ activeView, onNavigate }) {
           {activeView === 'convenios' && 'Rendimiento de convenios'}
           {activeView === 'experiences' && 'Desempeño de experiencias'}
           {activeView === 'behavior' && 'Perfil de clientes'}
+          {activeView === 'experienceAnalysis' && 'Relaciones entre experiencias'}
+          {activeView === 'clients' && 'Valor y fidelización'}
           {activeView === 'simulator' && 'Escenarios comerciales'}
         </p>
       </div>

@@ -1,0 +1,13 @@
+
+.experience-analysis-grid { grid-template-columns: 1fr 1fr; grid-template-rows: minmax(340px, auto) auto; }
+.experience-analysis-grid .view-chart { min-width: 0; overflow: hidden; }
+.experience-analysis-grid .view-card { min-width: 0; }
+.experience-analysis-grid .wide { grid-column: 1 / -1; }
+.view-subtitle { color: #738178; font-size: 12px; line-height: 1.55; max-width: 780px; margin: 9px 0 0; }
+.experience-table-wrap { overflow-x: auto; width: 100%; }
+.experience-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 720px; }
+.experience-table th { text-align: left; color: #738178; text-transform: uppercase; letter-spacing: .04em; font-size: 9px; font-weight: 800; padding: 11px 10px; border-bottom: 1px solid #e7eee9; }
+.experience-table td { padding: 13px 10px; border-bottom: 1px solid #edf1ed; color: #53635a; }
+.experience-table td strong { color: #183027; }
+.experience-table tr:last-child td { border-bottom: 0; }
+@media (max-width: 900px) { .experience-analysis-grid { grid-template-columns: 1fr; } .experience-analysis-grid .wide { grid-column: auto; } }
