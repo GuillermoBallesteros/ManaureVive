@@ -36,18 +36,6 @@ const NAV_ITEMS = [
     )
   },
   {
-    id: 'behavior',
-    label: 'Comportamiento',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <circle cx="8.5" cy="8" r="3" />
-        <circle cx="16" cy="9.5" r="2.3" />
-        <path d="M3 20c.6-3.4 3-5.4 5.5-5.4S13.4 16.6 14 20" />
-        <path d="M14.8 14.9c2 .2 3.7 1.9 4.2 5.1" />
-      </svg>
-    )
-  },
-  {
     id: 'experienceAnalysis',
     label: 'Análisis de experiencias',
     icon: (
@@ -62,6 +50,18 @@ const NAV_ITEMS = [
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.4 2.5-5.6 6-5.6s6 2.2 6 5.6" /><path d="M16 5.5a3 3 0 0 1 0 5.8M17 14.5c2.4.5 4 2.4 4 5" />
+      </svg>
+    )
+  },
+  {
+    id: 'behavior',
+    label: 'Comportamiento',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="8.5" cy="8" r="3" />
+        <circle cx="16" cy="9.5" r="2.3" />
+        <path d="M3 20c.6-3.4 3-5.4 5.5-5.4S13.4 16.6 14 20" />
+        <path d="M14.8 14.9c2 .2 3.7 1.9 4.2 5.1" />
       </svg>
     )
   },

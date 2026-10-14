@@ -40,11 +40,11 @@ function ExperienceAnalysis() {
     ]
   };
   const comboOption = {
-    grid: { left: 12, right: 25, top: 12, bottom: 12, containLabel: true },
+    grid: { left: 10, right: 34, top: 14, bottom: 18, containLabel: true },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     xAxis: { type: 'value', axisLabel: { fontSize: 9 }, splitLine: { lineStyle: { color: '#edf1ed' } } },
-    yAxis: { type: 'category', data: topCombo.map(x => x.name).reverse(), axisLabel: { fontSize: 9, width: 150, overflow: 'break', lineHeight: 13, margin: 10, formatter: (value) => { const words = value.split(/\s+/); const lines = []; let line = ''; words.forEach((word) => { const candidate = line ? `${line} ${word}` : word; if (candidate.length > 22 && line) { lines.push(line); line = word; } else { line = candidate; } }); if (line) lines.push(line); return lines.slice(0, 3).join('\n'); } } },
-    series: [{ type: 'bar', data: topCombo.map(x => x.count).reverse(), barMaxWidth: 22, itemStyle: { color: '#507a73', borderRadius: [0,5,5,0] }, label: { show: true, position: 'right', fontSize: 10 } }]
+    yAxis: { type: 'category', data: topCombo.map(x => x.name).reverse(), axisLabel: { fontSize: 10, width: 190, overflow: 'break', lineHeight: 14, margin: 14, align: 'right', formatter: (value) => { const words = value.split(/\s+/); const lines = []; let line = ''; words.forEach((word) => { const candidate = line ? `${line} ${word}` : word; if (candidate.length > 25 && line) { lines.push(line); line = word; } else { line = candidate; } }); if (line) lines.push(line); return lines.slice(0, 4).join('\n'); } } },
+    series: [{ type: 'bar', data: topCombo.map(x => x.count).reverse(), barMaxWidth: 24, barCategoryGap: '32%', itemStyle: { color: '#507a73', borderRadius: [0,5,5,0] }, label: { show: true, position: 'right', fontSize: 10 } }]
   };
   return <main className="view">
     <header className="view-header"><div><span className="view-tag">Análisis de experiencias</span><h1>Descubre cómo se <em>combinan y evolucionan</em></h1><p className="view-subtitle">Compara la demanda mensual con los ingresos y detecta qué experiencias suelen reservarse juntas para diseñar paquetes y promociones más relevantes.</p></div></header>
@@ -56,7 +56,7 @@ function ExperienceAnalysis() {
     </div>
     <div className="view-grid experience-analysis-grid">
       <article className="view-card"><div className="view-card-head"><div><span>Estacionalidad</span><h2>Consumos e ingreso por mes</h2></div></div><div className="view-chart"><ReactECharts option={trend} style={{height:'100%',width:'100%'}} /></div></article>
-      <article className="view-card"><div className="view-card-head"><div><span>Venta cruzada</span><h2>Combinaciones más frecuentes</h2></div></div><div className="view-chart"><ReactECharts option={comboOption} style={{height:'100%',width:'100%'}} /></div></article>
+      <article className="view-card"><div className="view-card-head"><div><span>Venta cruzada</span><h2>Combinaciones más frecuentes</h2></div></div><div className="view-chart combo-chart"><ReactECharts option={comboOption} style={{height:'410px',width:'100%'}} /></div></article>
       <article className="view-card wide"><div className="view-card-head"><div><span>Ficha comercial</span><h2>Experiencias, operador y rendimiento</h2></div></div>
         <div className="experience-table-wrap"><table className="experience-table"><thead><tr><th>Experiencia</th><th>Categoría</th><th>Socio asociado</th><th>Consumos</th><th>Tarifa</th><th>Ingreso bruto calculado</th></tr></thead><tbody>{byExperience.map(e=><tr key={e.id}><td><strong>{e.name}</strong></td><td>{e.category}</td><td>{e.partner}</td><td>{e.units.toLocaleString('es-CO')}</td><td>{COP(e.price)}</td><td>{COP(e.revenue)}</td></tr>)}</tbody></table></div>
       </article>

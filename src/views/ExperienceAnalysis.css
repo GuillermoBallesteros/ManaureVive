@@ -11,3 +11,18 @@
 .experience-table td strong { color: #183027; }
 .experience-table tr:last-child td { border-bottom: 0; }
 @media (max-width: 900px) { .experience-analysis-grid { grid-template-columns: 1fr; } .experience-analysis-grid .wide { grid-column: auto; } }
+
+
+/* Venta cruzada: más alto y con espacio reservado para etiquetas largas. */
+.experience-analysis-grid .combo-chart {
+  min-height: 410px;
+  height: 410px;
+  overflow: visible;
+}
+
+@media (max-width: 900px) {
+  .experience-analysis-grid .combo-chart {
+    min-height: 410px;
+    height: 410px;
+  }
+}
